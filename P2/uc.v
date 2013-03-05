@@ -1,7 +1,7 @@
-module uc (input wire clk, reset, z, input wire [5:0] opcode, output reg s_inc, s_inm, we3,fin , output reg [2:0] op);//Cambiams wire por reg
+module uc (input wire clk, reset, z, input wire [5:0] opcode, output reg s_inc, s_inc2, s_inm, we3,fin , output reg [2:0] op);//Cambiams wire por reg
 
 always @(*)
-
+begin
 	casex (opcode)
 
    	6'bxx0xxx://ALU
@@ -9,12 +9,14 @@ always @(*)
 	   	we3 <= 1'b1;//Activar escritura
 	   	op=opcode[2:0];
 	   	s_inc <= 1'b1; //Incrementa PC
+         s_inc2 <= 1'b0;
 	   	s_inm <= 1'b0; //Salida sumador a banco de registro
    	end
 
 	   6'bxx1000://CARGA
    	begin
    		s_inc <= 1'b1; //Suma uno a PC
+         s_inc2 <= 1'b0;
    		s_inm <= 1'b1; //WA3 a banco de registro y Dato inmediato a WD3
    		we3 <=1'b1; //Habilitar escritura
    	end
@@ -22,6 +24,7 @@ always @(*)
    	6'bxx1001://SALTO ABSOLUTO
    	begin
    		s_inc <= 1'b0; // Direccion a PC
+         s_inc2 <= 1'b0;
    		s_inm <= 1'b0; //No tiene importancia
    		we3 <= 1'b0; //No se escribe
    	end
@@ -30,6 +33,7 @@ always @(*)
    	begin
    		s_inm <= 1'b0;
    		we3 <= 1'b0;
+         s_inc2 <= 1'b0;
    		if (z) // 1 -> resultado op anterior 0
    			s_inc <= 1'b0; //Salto a la instruccion en registro de direccion
    		else
@@ -40,25 +44,26 @@ always @(*)
    	begin
    		s_inm <= 1'b0;
    		we3 <= 1'b0;
+         s_inc2 <= 1'b0;
    		if (z)
    			s_inc <= 1'b1; //Siguiente instruccion
    		else
 	   		s_inc <= 1'b0; //Salto a la siguiente
    	end
 	
-	/*
+	
    	6'bxx1100://SALTO RELATIVO
    	begin
-   		we3 <=1'b0
-   		op=opcode[2:0];
-   		s_inc <=
-   		s_inm <=
+   		we3 <=1'b0;
+   		s_inc <= 1'b1;
+         s_inc2 <= 1'b1;
+   		s_inm <= 1'b0;
    	end
-	*/
+	
 	
 	   6'bxx1111://Halt
 	      fin <= 1'b1;
 
-	endcase
-
+   endcase
+end
 endmodule
